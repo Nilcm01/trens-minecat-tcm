@@ -113,7 +113,7 @@ public class SignLinkDisplays {
                     //destination[2] = destination[0].substring(24);
 
                     // Si l'últim caràcter no és un espai, buscar l'últim espai abans de 24
-                    if (destination[0].charAt(maxDest-1) != ' ') {
+                    if (destination[0].charAt(maxDest - 1) != ' ') {
                         int pos = destination[0].substring(0, maxDest).lastIndexOf(' ');
                         destination[1] = destination[0].substring(0, pos);
                         destination[2] = destination[0].substring(pos + 1);
@@ -131,7 +131,9 @@ public class SignLinkDisplays {
                 varNom = varNom.replace("<", "");
                 linia = varNom.replace(">", "");
                 // Assignar marca
-                if (linia.contains("TAV")) {
+                if (linia.contains("ESP")) {
+                    marca = "";
+                } else if (linia.contains("TAV")) {
                     marca = "";
                 } else if (linia.contains("ALV")) {
                     marca = "";
@@ -154,7 +156,7 @@ public class SignLinkDisplays {
                     //infoLinia[2] = infoLinia[0].substring(22);
 
                     // Si l'últim caràcter no és un espai, buscar l'últim espai abans de 22
-                    if (infoLinia[0].charAt(maxInfo-1) != ' ') {
+                    if (infoLinia[0].charAt(maxInfo - 1) != ' ') {
                         int pos = infoLinia[0].substring(0, maxInfo).lastIndexOf(' ');
                         infoLinia[1] = infoLinia[0].substring(0, pos);
                         infoLinia[2] = infoLinia[0].substring(pos + 1);
@@ -166,9 +168,7 @@ public class SignLinkDisplays {
                     infoLinia[1] = infoLinia[0];
                     infoLinia[2] = "";
                 }
-            }
-
-            else {
+            } else {
                 destination[0] = "";
                 destination[1] = "";
                 destination[2] = "";
@@ -199,7 +199,7 @@ public class SignLinkDisplays {
             // Hora
             bi.setFont(TrensMinecat.minecraftiaJavaFont);
             bi.setColor(new Color(0, 0, 0));
-            bi.drawString(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), 206, 10+yoffset);
+            bi.drawString(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), 206, 10 + yoffset);
             bi.dispose();
             getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
 
@@ -208,9 +208,9 @@ public class SignLinkDisplays {
             bi.setFont(fontvia);
             bi.setColor(Color.WHITE);
             if (via < 10) {
-                bi.drawString(String.valueOf(via), 14, 26+yoffset);
+                bi.drawString(String.valueOf(via), 14, 26 + yoffset);
             } else {
-                bi.drawString("" + via, 5, 26+yoffset);
+                bi.drawString("" + via, 5, 26 + yoffset);
             }
             bi.dispose();
             getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
@@ -221,8 +221,12 @@ public class SignLinkDisplays {
                 bi = bufferedImage.createGraphics();
 
                 try {
-                    // TAV
-                    if (linia.contains("TAV")) {
+                        // ESP
+                    if (linia.contains("ESP")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/info.png"), 49, 30);
+
+                        // TAV
+                    } else if (linia.contains("TAV")) {
                         getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/TAV.png"), 49, 30);
 
                         // ALV
@@ -236,17 +240,18 @@ public class SignLinkDisplays {
                         // Rodalies
                     } else if (linia.contains("RB") || linia.contains("RV")) {
                         getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/ROD.png"), 49, 30);
-                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/" + linia + ".png"), 49+28+3, 30);
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/" + linia + ".png"), 49 + 28 + 3, 30);
 
                         // Regional i Suburbà
-                    } else if (linia.contains("R") || linia.contains("S") ) {
+                    } else if (linia.contains("R") || linia.contains("S")) {
                         getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/FGC.png"), 49, 30);
-                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/" + linia + ".png"), 49+28+3, 30);
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/" + linia + ".png"), 49 + 28 + 3, 30);
 
                         // LD
                     } else if (linia.contains("LD")) {
                         getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/FGC.png"), 49, 30);
-                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/LD.png"), 49+28+3, 30);
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/LD.png"), 49 + 28 + 3, 30);
+
                     }
                 } catch (Exception e) {
                     getLogger().info("Error al carregar imatge: valor de linia \"" + linia + "\" incorrecte." + "\n" + e.getMessage());
@@ -256,8 +261,8 @@ public class SignLinkDisplays {
                 bi = bufferedImage.createGraphics();
                 bi.setFont(boldfont);
                 bi.setColor(Color.BLACK);
-                bi.drawString(destination[1], 50, 61+yoffset);
-                bi.drawString(destination[2], 50, 75+yoffset);
+                bi.drawString(destination[1], 50, 61 + yoffset);
+                bi.drawString(destination[2], 50, 75 + yoffset);
                 bi.dispose();
                 getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
 
@@ -265,8 +270,8 @@ public class SignLinkDisplays {
                 bi = bufferedImage.createGraphics();
                 bi.setFont(plainfont);
                 bi.setColor(Color.BLACK);
-                bi.drawString(infoLinia[1], 50, 94+yoffset);
-                bi.drawString(infoLinia[2], 50, 108+yoffset);
+                bi.drawString(infoLinia[1], 50, 94 + yoffset);
+                bi.drawString(infoLinia[2], 50, 108 + yoffset);
                 bi.dispose();
                 getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
             }
