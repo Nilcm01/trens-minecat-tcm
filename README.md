@@ -1,5 +1,9 @@
-# trens-minecat
-Gestió d'informació i funcionament de trens al servidor de Minecraft.
+# trens-minecat-tcm
+Plugin de informació i funcionament de trens al servidor de Minecraft modificat per funcionar al servidor TCM.
+
+## Crèdits
+La totalitat del plugin ha estat desenvolupada per [Jan Viñas Corella](https://github.com/janvinas) i [JCIBravo](https://github.com/JCIBravo).
+Les úniques excepcions són els commits fets per [Nilcm01](https://github.com/Nilcm01).
 
 ## Pantalles
 
@@ -27,6 +31,11 @@ _Els models 1 i 2 provenen de versions antigues i probablement desapareixeran en
 
 _Imatge 5: JCIBravo_
 
+###### 6:
+
+ADIF (2x3): Sortides (fins a 7)
+
+_Implementat per Nilcm01_
 
 ## Pantalles Manuals
 
@@ -125,6 +134,12 @@ Contenen una variable signlink configurable que s'actualitza cada tick.
 ###### 1:
 
 ![imatge](/imatges/signlink/1.png)
+
+###### 2:
+
+ADIF (2x2): Pròxim tren
+
+_Implementat per Nilcm01_
 
 Per actualitzar el nom de la variable: `/tm configurar sldisplay variable <nom>`
 Per actualitzar la destinació mostrada al cartell: `/tm configurar sldisplay destinacio <nom>`

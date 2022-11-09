@@ -164,6 +164,8 @@ public class TrensMinecat extends JavaPlugin {
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard4.class);
                     }else if(args[2].equalsIgnoreCase("5")){
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard5.class);
+                    }else if(args[2].equalsIgnoreCase("6")){
+                        display = MapDisplay.createMapItem(MapDisplays.DepartureBoard6.class);
                     }else{
                         sender.sendMessage("The display with ID " + args[2] + " does not exist");
                         return false;
@@ -226,6 +228,10 @@ public class TrensMinecat extends JavaPlugin {
                     ItemStack display;
                     if(args[2].equalsIgnoreCase("1")){
                         display = MapDisplay.createMapItem(SignLinkDisplays.SignLinkDisplay1.class);
+                        ((Player) sender).getInventory().addItem(display);
+                        return true;
+                    }else if(args[2].equalsIgnoreCase("2")) {
+                        display = MapDisplay.createMapItem(SignLinkDisplays.SignLinkDisplay2.class);
                         ((Player) sender).getInventory().addItem(display);
                         return true;
                     }

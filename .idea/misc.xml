@@ -6,6 +6,16 @@
     </list>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenCompilerTasksManager">
+    <option name="afterCompileTasks">
+      <set>
+        <MavenCompilerTask>
+          <option name="goal" value="package" />
+          <option name="projectPath" value="$PROJECT_DIR$/pom.xml" />
+        </MavenCompilerTask>
+      </set>
+    </option>
+  </component>
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
@@ -13,7 +23,7 @@
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="openjdk-16" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" project-jdk-name="16" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

@@ -16,6 +16,7 @@
           <entry name="$MAVEN_REPOSITORY$/info/picocli/picocli-codegen/4.6.3/picocli-codegen-4.6.3.jar" />
           <entry name="$MAVEN_REPOSITORY$/info/picocli/picocli/4.6.3/picocli-4.6.3.jar" />
         </processorPath>
+        <module name="trens-minecat-tcm" />
         <module name="trens-minecat" />
       </profile>
     </annotationProcessing>
@@ -23,6 +24,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="trens-minecat" options="-Aproject=io.github.janvinas/trens-minecat" />
+      <module name="trens-minecat-tcm" options="-Aproject=io.github.janvinas/trens-minecat" />
     </option>
   </component>
 </project>

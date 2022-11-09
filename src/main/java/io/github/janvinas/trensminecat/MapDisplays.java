@@ -14,11 +14,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Level;
 
-public class MapDisplays{
+public class MapDisplays {
     static String imgDir = "img/";
     static int updateTime = 100; //time in ticks between sign updates
+
     //TODO afegir cartell rodalies antic (leds vermells)
-    public static class DepartureBoard1 extends MapDisplay{
+    public static class DepartureBoard1 extends MapDisplay {
         int tickCount = 0;
 
         @Override
@@ -65,7 +66,7 @@ public class MapDisplays{
             getLayer(3).setAlignment(MapFont.Alignment.RIGHT);
             getLayer(3).draw(MapFont.MINECRAFT, 254, 113, MapColorPalette.getColor(0, 0, 0), now.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
-            if( (tickCount % updateTime) == 0){
+            if ((tickCount % updateTime) == 0) {
 
                 int secondsToDisplayOnBoard = TrensMinecat.secondsToDisplayOnBoard;
                 DepartureBoardTemplate template = TrensMinecat.departureBoards.get(properties.get("template", String.class));
@@ -75,36 +76,36 @@ public class MapDisplays{
                 getLayer(1).clear();
                 getLayer(1).setAlignment(MapFont.Alignment.LEFT);
                 int i = 0;
-                for(LocalDateTime departureTime : departureBoardTrains.keySet()){
+                for (LocalDateTime departureTime : departureBoardTrains.keySet()) {
                     Duration untilDeparture = Duration.between(now, departureTime);
-                    if(untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()){
-                        getLayer(1).draw(MapFont.MINECRAFT, 1, 22 + i*10,
+                    if (untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
+                        getLayer(1).draw(MapFont.MINECRAFT, 1, 22 + i * 10,
                                 MapColorPalette.getColor(255, 0, 0),
                                 "now");
-                    }else if(untilDeparture.minusMinutes(5).isNegative()){
-                        getLayer(1).draw(MapFont.MINECRAFT, 1, 22 + i*10,
+                    } else if (untilDeparture.minusMinutes(5).isNegative()) {
+                        getLayer(1).draw(MapFont.MINECRAFT, 1, 22 + i * 10,
                                 MapColorPalette.getColor(0, 0, 0),
                                 departureTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " (" +
                                         (int) untilDeparture.getSeconds() / 60 + "min)");
-                    }else{
-                        getLayer(1).draw(MapFont.MINECRAFT, 1, 22 + i*10,
+                    } else {
+                        getLayer(1).draw(MapFont.MINECRAFT, 1, 22 + i * 10,
                                 MapColorPalette.getColor(0, 0, 0),
                                 departureTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                     }
 
-                    getLayer(1).draw(MapFont.MINECRAFT, 80, 22 + i*10,
+                    getLayer(1).draw(MapFont.MINECRAFT, 80, 22 + i * 10,
                             MapColorPalette.getColor(0, 0, 0),
                             departureBoardTrains.get(departureTime).name);
                     String destination = departureBoardTrains.get(departureTime).destination;
-                    if(!destination.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 107, 22 + i*10,
+                    if (!destination.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 107, 22 + i * 10,
                             MapColorPalette.getColor(0, 0, 0),
                             departureBoardTrains.get(departureTime).destination);
                     String platform = departureBoardTrains.get(departureTime).platform;
-                    if(!platform.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 170, 22 + i*10,
+                    if (!platform.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 170, 22 + i * 10,
                             MapColorPalette.getColor(0, 0, 0),
                             departureBoardTrains.get(departureTime).platform);
                     String information = departureBoardTrains.get(departureTime).information;
-                    if(!information.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 190, 22 + i*10,
+                    if (!information.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 190, 22 + i * 10,
                             MapColorPalette.getColor(0, 0, 0),
                             departureBoardTrains.get(departureTime).information);
 
@@ -119,7 +120,7 @@ public class MapDisplays{
 
     }
 
-    public static class DepartureBoard2 extends MapDisplay{
+    public static class DepartureBoard2 extends MapDisplay {
         int tickCount = 0;
 
         @Override
@@ -134,7 +135,7 @@ public class MapDisplays{
 
         @Override
         public void onTick() {
-            if( (tickCount % updateTime) == 0){
+            if ((tickCount % updateTime) == 0) {
 
                 getLayer(1).clear();
                 getLayer(1).setAlignment(MapFont.Alignment.LEFT);
@@ -147,16 +148,16 @@ public class MapDisplays{
                 LocalDateTime departureTime = departureBoardTrains.firstKey();
                 Duration untilDeparture = Duration.between(now, departureTime);
 
-                if(untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()){
+                if (untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
                     getLayer(1).draw(MapFont.MINECRAFT, 5, 47,
                             MapColorPalette.getColor(255, 0, 0),
                             "now");
-                }else if(untilDeparture.minusMinutes(5).isNegative()){
+                } else if (untilDeparture.minusMinutes(5).isNegative()) {
                     getLayer(1).draw(MapFont.MINECRAFT, 5, 47,
                             MapColorPalette.getColor(255, 201, 14),
                             departureTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " (" +
                                     (int) untilDeparture.getSeconds() / 60 + "min)");
-                }else{
+                } else {
                     getLayer(1).draw(MapFont.MINECRAFT, 5, 47,
                             MapColorPalette.getColor(255, 201, 14),
                             departureTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
@@ -165,11 +166,11 @@ public class MapDisplays{
                         MapColorPalette.getColor(255, 201, 14),
                         departureBoardTrains.get(departureTime).name);
                 String destination = departureBoardTrains.get(departureTime).destination;
-                if(!destination.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 5, 73,
+                if (!destination.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 5, 73,
                         MapColorPalette.getColor(255, 201, 14),
                         destination);
                 String information = departureBoardTrains.get(departureTime).information;
-                if(!information.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 5, 86,
+                if (!information.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 5, 86,
                         MapColorPalette.getColor(255, 201, 14),
                         departureBoardTrains.get(departureTime).information);
             }
@@ -179,7 +180,7 @@ public class MapDisplays{
         }
     }
 
-    public static class DepartureBoard3 extends MapDisplay{
+    public static class DepartureBoard3 extends MapDisplay {
         int tickCount = 0;
 
         @Override
@@ -196,7 +197,7 @@ public class MapDisplays{
         @Override
         public void onTick() {
 
-            if( (tickCount % updateTime) == 0){
+            if ((tickCount % updateTime) == 0) {
 
                 int secondsToDisplayOnBoard = TrensMinecat.secondsToDisplayOnBoard;
                 DepartureBoardTemplate template = TrensMinecat.departureBoards.get(properties.get("template", String.class));
@@ -208,7 +209,7 @@ public class MapDisplays{
                 getLayer(4).clear();
                 getLayer(4).setAlignment(MapFont.Alignment.LEFT);
 
-                if(untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()){
+                if (untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
                     //imprimeix el nom del tren gran
                     getLayer(4).draw(Assets.getMapTexture(imgDir + "28px/" +
                             departureBoardTrains.get(departureTime).name + ".png"), 5, 14);
@@ -217,7 +218,7 @@ public class MapDisplays{
                             MapColorPalette.getColor(255, 255, 255),
                             departureBoardTrains.get(departureTime).destination.toUpperCase());
 
-                }else if(untilDeparture.minusMinutes(5).isNegative()){
+                } else if (untilDeparture.minusMinutes(5).isNegative()) {
                     //imprimeix informació
                     getLayer(4).draw(Assets.getMapTexture(imgDir + "28px/" +
                             departureBoardTrains.get(departureTime).name + ".png"), 5, 14);
@@ -231,8 +232,8 @@ public class MapDisplays{
                             departureBoardTrains.get(departureTime).destination);
                     getLayer(4).draw(MapFont.MINECRAFT, 108, 24,
                             MapColorPalette.getColor(255, 255, 255),
-                            String.valueOf(untilDeparture.getSeconds()/60));
-                }else{
+                            String.valueOf(untilDeparture.getSeconds() / 60));
+                } else {
                     //imprimeix logo i hora
                     getLayer(4).draw(Assets.getMapTexture(imgDir + "28px/rodalies.png"), 5, 14);
                     getLayer(4).setAlignment(MapFont.Alignment.RIGHT);
@@ -246,7 +247,7 @@ public class MapDisplays{
         }
     }
 
-    public static class DepartureBoard4 extends MapDisplay{
+    public static class DepartureBoard4 extends MapDisplay {
         int tickCount = 0;
         final int maxAcceptableDelay = 20; //time in seconds
 
@@ -266,18 +267,18 @@ public class MapDisplays{
             getLayer(2).draw(MapFont.MINECRAFT, 227, 7, MapColorPalette.COLOR_BLACK,
                     now.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
 
-            if( (tickCount % updateTime) == 0){
+            if ((tickCount % updateTime) == 0) {
                 int secondsToDisplayOnBoard = TrensMinecat.secondsToDisplayOnBoard;
                 DepartureBoardTemplate template = TrensMinecat.departureBoards.get(properties.get("template", String.class));
                 String andana = properties.get("platform", String.class, "");
                 TreeMap<LocalDateTime, Departure> departureBoardTrains = BoardUtils.fillDepartureBoard(now, template.trainLines, template.length, properties.get("template", String.class), false);
                 TreeMap<LocalDateTime, Departure> departures = new TreeMap<>();
 
-                if(!andana.equals("")){
-                    departureBoardTrains.forEach( (time, departure) ->{
-                        if(!departure.platform.equals(andana)) departures.put(time, departure);
+                if (!andana.equals("")) {
+                    departureBoardTrains.forEach((time, departure) -> {
+                        if (!departure.platform.equals(andana)) departures.put(time, departure);
                     });
-                }else{
+                } else {
                     departures.putAll(departureBoardTrains);
                 }
 
@@ -285,43 +286,43 @@ public class MapDisplays{
                 getLayer(1).clear();
                 getLayer(1).setAlignment(MapFont.Alignment.LEFT);
                 int i = 0;
-                for(LocalDateTime departureTime : departures.keySet()){
-                    if(i > template.length) break;
+                for (LocalDateTime departureTime : departures.keySet()) {
+                    if (i > template.length) break;
                     Duration untilDeparture = Duration.between(now, departureTime);
                     Departure departure = departures.get(departureTime);
                     boolean isDelayed = !departure.delay.minusSeconds(maxAcceptableDelay).isNegative();
 
-                    if(untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
+                    if (untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
                         getLayer(1).draw(MapFont.MINECRAFT, 113, 34 + i * 14,
                                 MapColorPalette.getColor(0, 128, 0), "imminent");
-                    }else if(untilDeparture.minusMinutes(5).isNegative()){
+                    } else if (untilDeparture.minusMinutes(5).isNegative()) {
                         getLayer(1).draw(MapFont.MINECRAFT, 113, 34 + i * 14,
                                 MapColorPalette.getColor(0, 128, 0),
-                                untilDeparture.getSeconds()/60 + "min");
-                    }else{
-                        getLayer(1).draw(MapFont.MINECRAFT, 113, 34 + i*14,
+                                untilDeparture.getSeconds() / 60 + "min");
+                    } else {
+                        getLayer(1).draw(MapFont.MINECRAFT, 113, 34 + i * 14,
                                 MapColorPalette.getColor(0, 0, 0),
                                 departureTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
                     }
                     getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/" +
-                            departure.name + ".png"), 1, 33 + i*14);
+                            departure.name + ".png"), 1, 33 + i * 14);
 
                     String destination = departure.destination;
-                    if(!destination.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 21, 34 + i*14,
+                    if (!destination.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 21, 34 + i * 14,
                             MapColorPalette.getColor(0, 0, 0),
                             departure.destination);
                     String platform = departure.platform;
-                    if(!platform.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 99, 34 + i*14,
+                    if (!platform.equals("_")) getLayer(1).draw(MapFont.MINECRAFT, 99, 34 + i * 14,
                             MapColorPalette.getColor(0, 0, 0),
                             departure.platform);
                     String information = departure.information;
-                    if(isDelayed){
+                    if (isDelayed) {
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-                        getLayer(1).draw(MapFont.MINECRAFT, 162, 34 + i*14,
+                        getLayer(1).draw(MapFont.MINECRAFT, 162, 34 + i * 14,
                                 MapColorPalette.getColor(255, 0, 0),
                                 "estim. " + formatter.format(departureTime.plus(departure.delay)));
-                    }else if(!information.equals("_")){
-                        getLayer(1).draw(MapFont.MINECRAFT, 162, 34 + i*14,
+                    } else if (!information.equals("_")) {
+                        getLayer(1).draw(MapFont.MINECRAFT, 162, 34 + i * 14,
                                 MapColorPalette.getColor(0, 0, 0),
                                 departure.information);
                     }
@@ -350,7 +351,7 @@ public class MapDisplays{
         @Override
         public void onTick() {
             super.onTick();
-            if(tickCount % updateTime == 0) {
+            if (tickCount % updateTime == 0) {
 
                 getLayer(4).clear();
                 LocalDateTime now = LocalDateTime.now();
@@ -364,11 +365,11 @@ public class MapDisplays{
                 TreeMap<LocalDateTime, Departure> departureBoardTrains = BoardUtils.fillDepartureBoard(now, template.trainLines, template.length, properties.get("template", String.class), false);
                 TreeMap<LocalDateTime, Departure> departures = new TreeMap<>();
 
-                if(!andana.equals("")){
-                    departureBoardTrains.forEach( (time, departure) ->{
-                        if(departure.platform.equals(andana)) departures.put(time, departure);
+                if (!andana.equals("")) {
+                    departureBoardTrains.forEach((time, departure) -> {
+                        if (departure.platform.equals(andana)) departures.put(time, departure);
                     });
-                }else{
+                } else {
                     departures.putAll(departureBoardTrains);
                 }
 
@@ -379,7 +380,7 @@ public class MapDisplays{
                 g.setFont(TrensMinecat.minecraftiaJavaFont);
 
                 int i = 0;
-                for(LocalDateTime departureTime : departures.keySet()) {
+                for (LocalDateTime departureTime : departures.keySet()) {
                     if (i > 3) break;
                     Departure departure = departures.get(departureTime);
                     LocalDateTime departureWithDelay = departureTime.plus(departure.delay);
@@ -387,32 +388,167 @@ public class MapDisplays{
                     boolean isDelayed = !departure.delay.minusSeconds(maxAcceptableDelay).isNegative();
 
                     MapTexture lineIcon = Assets.getMapTexture(imgDir + "11px/" + departure.name + ".png");
-                    if(!(lineIcon.getHeight() > 1)){
+                    if (!(lineIcon.getHeight() > 1)) {
                         lineIcon = Assets.getMapTexture(imgDir + "11px/info.png");
                     }
 
-                    getLayer(3).draw(lineIcon, 5, 47 + 15*i);
+                    getLayer(3).draw(lineIcon, 5, 47 + 15 * i);
                     g.setColor(Color.BLACK);
-                    g.drawString(departure.destination, 26, 47 + 15*i);
-                    if(!departure.platform.equals("_")) g.drawString(departure.platform, 120, 47 + 15*i);
-                    if(isDelayed) g.setColor(new Color(255, 0, 0));
+                    g.drawString(departure.destination, 26, 47 + 15 * i);
+                    if (!departure.platform.equals("_")) g.drawString(departure.platform, 120, 47 + 15 * i);
+                    if (isDelayed) g.setColor(new Color(255, 0, 0));
 
-                    if(untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
-                        g.drawString("immin.", 133, 47 + 15*i);
-                    }else if(untilDeparture.minusMinutes(5).isNegative()){
-                        g.drawString(untilDeparture.getSeconds()/60 + "min", 133, 47 + 15*i);
-                    }else{
-                        g.drawString(departureTime.format(DateTimeFormatter.ofPattern("HH:mm")), 133, 47 + 15*i);
+                    if (untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
+                        g.drawString("immin.", 133, 47 + 15 * i);
+                    } else if (untilDeparture.minusMinutes(5).isNegative()) {
+                        g.drawString(untilDeparture.getSeconds() / 60 + "min", 133, 47 + 15 * i);
+                    } else {
+                        g.drawString(departureTime.format(DateTimeFormatter.ofPattern("HH:mm")), 133, 47 + 15 * i);
                     }
 
                     i++;
                 }
 
                 g.dispose();
-                getLayer(2).draw(MapTexture.fromImage(text),6 , 14); //text offset
+                getLayer(2).draw(MapTexture.fromImage(text), 6, 14); //text offset
 
             }
             tickCount++;
         }
     }
+
+    public static class DepartureBoard6 extends MapDisplay {
+        int tickCount = 0;
+        final int maxAcceptableDelay = 20; //time in seconds
+
+        @Override
+        public void onAttached() {
+            super.onAttached();
+            setUpdateWithoutViewers(false);
+            getLayer(0).draw(Assets.getMapTexture(imgDir + "DepartureBoard6.png"), 0, 0);
+        }
+
+        @Override
+        public void onTick() {
+
+            int yoffset = 12;
+
+            LocalDateTime now = LocalDateTime.now();
+            getLayer(2).clear();
+            getLayer(2).setAlignment(MapFont.Alignment.LEFT);
+            BufferedImage bufferedImageL2 = new BufferedImage(384, 128, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D biL2 = bufferedImageL2.createGraphics();
+            biL2.setFont(TrensMinecat.minecraftiaJavaFont);
+            biL2.setColor(Color.BLACK);
+            biL2.drawString(now.format(DateTimeFormatter.ofPattern("HH:mm:ss")), 336, 7+yoffset);
+            biL2.dispose();
+            getLayer(2).draw(MapTexture.fromImage(bufferedImageL2), 0, 0);
+
+            if ((tickCount % updateTime) == 0) {
+                DepartureBoardTemplate template = TrensMinecat.departureBoards.get(properties.get("template", String.class));
+                String andana = properties.get("platform", String.class, "");
+                TreeMap<LocalDateTime, Departure> departureBoardTrains = BoardUtils.fillDepartureBoard(now, template.trainLines, template.length, properties.get("template", String.class), false);
+                TreeMap<LocalDateTime, Departure> departures = new TreeMap<>();
+
+                if (!andana.equals("")) {
+                    departureBoardTrains.forEach((time, departure) -> {
+                        if (!departure.platform.equals(andana)) departures.put(time, departure);
+                    });
+                } else {
+                    departures.putAll(departureBoardTrains);
+                }
+
+                //print train lines on screen
+                getLayer(1).clear();
+                getLayer(1).setAlignment(MapFont.Alignment.LEFT);
+                BufferedImage bufferedImageL1 = new BufferedImage(384, 128, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D biL1 = bufferedImageL1.createGraphics();
+                biL1.setFont(TrensMinecat.minecraftiaJavaFont);
+                biL1.setColor(Color.BLACK);
+
+                int i = 0;
+                for (LocalDateTime departureTime : departures.keySet()) {
+                    if (i > template.length) break;
+                    Duration untilDeparture = Duration.between(now, departureTime);
+                    Departure departure = departures.get(departureTime);
+
+                    /*if(untilDeparture.minusSeconds(secondsToDisplayOnBoard).isNegative()) {
+                        getLayer(1).draw(MapFont.MINECRAFT, 113, 34 + i * 14,
+                                MapColorPalette.getColor(0, 128, 0), "imminent");
+                    }else if(untilDeparture.minusMinutes(5).isNegative()){
+                        getLayer(1).draw(MapFont.MINECRAFT, 113, 34 + i * 14,
+                                MapColorPalette.getColor(0, 128, 0),
+                                untilDeparture.getSeconds()/60 + "min");
+                    }else{
+                        getLayer(1).draw(MapFont.MINECRAFT, 113, 34 + i*14,
+                                MapColorPalette.getColor(0, 0, 0),
+                                departureTime.format(DateTimeFormatter.ofPattern("HH:mm:ss")));
+                    }*/
+
+                    ////// Imatges de les línies
+                    // getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/" +
+                    //                            departure.name + ".png"), 1, 33 + i*14);
+                    //////
+
+                    // TAV i ALV
+                    if (departure.name.equals("TAV") || departure.name.equals("ALV")) {
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/" +
+                                departure.name + ".png"), 2, 33 + i * 14);
+
+                    // Tren Lleuger
+                    } else if (departure.name.equals("TLL")) {
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/TLL.png"), 2 + 6, 33 + i * 14);
+
+
+                    // Rodalies
+                    } else if (departure.name.contains("RB") || departure.name.contains("RV")) {
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/ROD.png"), 2, 33 + i * 14);
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/" +
+                                departure.name + ".png"), 2 + 11, 33 + i * 14);
+
+                    // FGC (Resta)
+                    }else{
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/FGC.png"), 2, 33 + i * 14);
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/" +
+                                departure.name + ".png"), 2 + 11, 33 + i * 14);
+                    }
+
+                    String destination = departure.destination;
+                    if (!destination.equals("_")) {
+                        biL1.drawString(departure.destination, 27, 35 + i*14 + yoffset);
+                        //getLayer(1).draw(MapFont.MINECRAFT, 27, 35 + i * 14,
+                        //        MapColorPalette.getColor(0, 0, 0),
+                        //        departure.destination);
+                    }
+
+                    String platform = departure.platform;
+                    int platformX = 173;
+                    if (Integer.parseInt(platform) >= 10) platformX -= 3;
+                    if (!platform.equals("_")) {
+                        biL1.drawString(departure.platform, platformX, 35 + i*14 + yoffset);
+                        //getLayer(1).draw(MapFont.MINECRAFT, platformX, 35 + i * 14,
+                        //        MapColorPalette.getColor(0, 0, 0),
+                        //        departure.platform);
+                    }
+
+                    String information = departure.information;
+                    if (!information.equals("_")) {
+                        biL1.drawString(departure.information, 186, 35 + i*14 + yoffset);
+                        //getLayer(1).draw(MapFont.MINECRAFT, 186, 35 + i * 14,
+                        //        MapColorPalette.getColor(0, 0, 0),
+                        //        departure.information);
+                    }
+                    i++;
+                }
+
+                biL1.dispose();
+                getLayer(1).draw(MapTexture.fromImage(bufferedImageL1), 0, 0);
+            }
+
+            tickCount++;
+            super.onTick();
+        }
+
+    }
+
 }
