@@ -425,7 +425,8 @@ public class MapDisplays {
         public void onAttached() {
             super.onAttached();
             setUpdateWithoutViewers(false);
-            getLayer(0).draw(Assets.getMapTexture(imgDir + "DepartureBoard6.png"), 0, 0);
+            getLayer(0).clear();
+            getLayer(0).draw(loadTexture(imgDir + "DepartureBoard6.png"), 0, 0);
         }
 
         @Override
@@ -436,7 +437,7 @@ public class MapDisplays {
             LocalDateTime now = LocalDateTime.now();
             getLayer(2).clear();
             getLayer(2).setAlignment(MapFont.Alignment.LEFT);
-            BufferedImage bufferedImageL2 = new BufferedImage(384, 128, BufferedImage.TYPE_INT_ARGB);
+            BufferedImage bufferedImageL2 = new BufferedImage(384, 256, BufferedImage.TYPE_INT_ARGB);
             Graphics2D biL2 = bufferedImageL2.createGraphics();
             biL2.setFont(TrensMinecat.minecraftiaJavaFont);
             biL2.setColor(Color.BLACK);
@@ -461,7 +462,7 @@ public class MapDisplays {
                 //print train lines on screen
                 getLayer(1).clear();
                 getLayer(1).setAlignment(MapFont.Alignment.LEFT);
-                BufferedImage bufferedImageL1 = new BufferedImage(384, 128, BufferedImage.TYPE_INT_ARGB);
+                BufferedImage bufferedImageL1 = new BufferedImage(384, 256, BufferedImage.TYPE_INT_ARGB);
                 Graphics2D biL1 = bufferedImageL1.createGraphics();
                 biL1.setFont(TrensMinecat.minecraftiaJavaFont);
                 biL1.setColor(Color.BLACK);
