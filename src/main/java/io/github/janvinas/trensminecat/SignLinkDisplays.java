@@ -159,17 +159,12 @@ public class SignLinkDisplays {
                 if (linia.contains("ESPECIAL")) {
                     marca = "";
                     tipus = "";
-                } else if (linia.contains("TAV")) {
-                    marca = "";
-                    tipus = "";
-                } else if (linia.contains("ALV")) {
-                    marca = "";
+                } else if (linia.contains("TAV") ||linia.contains("ALV") ||
+                           linia.contains("S") || linia.contains("LD")) {
+                    marca = "FGC";
                     tipus = "";
                 } else if ((linia.contains("RB")) || (linia.contains("RV"))) {
                     marca = "ROD";
-                    tipus = "";
-                } else if ((linia.contains("S")) || (linia.contains("LD"))) {
-                    marca = "FGC";
                     tipus = "";
                 } else if ((linia.contains("R"))) {
                     marca = "FGC";
@@ -189,6 +184,7 @@ public class SignLinkDisplays {
 
                 // Llegir info línia
                 String varInfoLinia = "INFO" + marca + linia + tipus;
+                infoLinia.clear();
                 infoLinia.add(Variables.get(varInfoLinia).getDefault());
 
                 int maxInfo = 38;
@@ -200,15 +196,18 @@ public class SignLinkDisplays {
                     infoLinia.set(infoLinia.size() - 2, infoLinia.get(infoLinia.size() - 2).substring(0, pos));
                 }
 
+                if (infoLinia.size() > 2)
+                    infoLinia.add("");
+
             } else {
                 destination[0] = "";
                 destination[1] = "";
                 destination[2] = "";
                 linia = "";
                 marca = "";
-                infoLinia.set(0, "");
-                infoLinia.set(1, "");
-                infoLinia.set(2, "");
+                //infoLinia.set(0, "");
+                //infoLinia.set(1, "");
+                //infoLinia.set(2, "");
             }
 
             // Si
@@ -313,7 +312,9 @@ public class SignLinkDisplays {
                 bi.setFont(plainfont);
                 bi.setColor(Color.BLACK);
 
-                int pos1 = cicleCounter % infoLinia.size();
+                int pos1 = 0;
+                if (infoLinia.size() > 0)
+                    pos1 = cicleCounter % infoLinia.size();
                 int pos2 = 0;
 
                 if (infoLinia.size() > 2) {
@@ -327,7 +328,7 @@ public class SignLinkDisplays {
                 } else if (infoLinia.size() > 1) {
                     bi.drawString(infoLinia.get(0), 50, 94 + yoffset);
                     bi.drawString(infoLinia.get(1), 50, 108 + yoffset);
-                } else {
+                } else if (infoLinia.size() > 0) {
                     bi.drawString(infoLinia.get(0), 50, 94 + yoffset);
                 }
 
@@ -335,9 +336,9 @@ public class SignLinkDisplays {
                 getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
             }
 
-            // Cada cop que tickCounter arriba a 20 (1 segon), incrementa cicleCounter
+            // Cada cop que tickCounter arriba a 60 (3 segons), incrementa cicleCounter
             tickCounter++;
-            if (tickCounter >= 20) {
+            if (tickCounter >= 60) {
                 tickCounter = 0;
                 cicleCounter++;
 
