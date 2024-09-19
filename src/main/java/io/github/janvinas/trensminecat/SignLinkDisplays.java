@@ -3,11 +3,13 @@ package io.github.janvinas.trensminecat;
 import com.bergerkiller.bukkit.common.map.MapDisplay;
 import com.bergerkiller.bukkit.common.map.MapTexture;
 import com.bergerkiller.bukkit.sl.API.Variables;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Vector;
 
 /**
@@ -134,6 +136,307 @@ public class SignLinkDisplays {
                         .replace("<", "")
                         .replace(">", "");
 
+
+                // Assignar marca i tipus de servei
+                if (linia.contains("ESP") || linia.contains("TB")) {
+                    marca = "";
+                    tipus = "";
+                } else if (linia.contains("TAV") ||linia.contains("ALV") ||
+                           linia.contains("S") || linia.contains("LD")) {
+                    marca = "FGC";
+                    tipus = "";
+                } else if ((linia.contains("RB")) || (linia.contains("RV"))) {
+                    marca = "ROD";
+                    tipus = "";
+                } else if ((linia.contains("R"))) {
+                    marca = "FGC";
+                    if (linia.contains("REX")) {
+                        tipus = "REX";
+                        linia = linia.replace("REX", "").replace("-", "");
+                    } else {
+                        tipus = "";
+                    }
+                } else if (linia.contains("TLL")) {
+                    marca = "";
+                    tipus = "";
+                } else {
+                    marca = null;
+                    tipus = null;
+                }
+
+                // Llegir info línia
+                String varInfoLinia = "INFO" + marca + linia + tipus;
+                infoLinia.clear();
+                infoLinia.add(Variables.get(varInfoLinia).getDefault());
+
+                int maxInfo = 35;
+                // Si la línia és més llarga que maxInfo, dividir-ne el restant amb la de sota. Repetir fins que la última línia sigui menor que maxInfo
+                while (infoLinia.lastElement().length() > maxInfo) {
+                    // Buscar l'últim espai abans de maxInfo
+                    int pos = infoLinia.lastElement().substring(0, maxInfo).lastIndexOf(' ');
+                    infoLinia.add(infoLinia.lastElement().substring(pos + 1));
+                    infoLinia.set(infoLinia.size() - 2, infoLinia.get(infoLinia.size() - 2).substring(0, pos));
+                }
+
+                if (infoLinia.size() > 2)
+                    infoLinia.add("");
+
+            } else {
+                destination[0] = "";
+                destination[1] = "";
+                destination[2] = "";
+                linia = "";
+                marca = "";
+                //infoLinia.set(0, "");
+                //infoLinia.set(1, "");
+                //infoLinia.set(2, "");
+            }
+
+            // Si
+
+            /*
+             * Informació a mostrar:
+             * - Hora (hh:mm:ss)
+             * - Via
+             * - Logo Marca (FGC, TAV, ALV, ROD, TLL)
+             * - Linia (FGC, ROD, TLL)
+             * - Destinació (dues línies)
+             * - Info Linia (dues línies)
+             */
+
+            BufferedImage bufferedImage = new BufferedImage(256, 128, BufferedImage.TYPE_INT_ARGB);
+
+            int yoffset = 12;
+
+            Graphics2D bi = bufferedImage.createGraphics();
+            // Hora
+            bi.setFont(TrensMinecat.minecraftiaJavaFont);
+            bi.setColor(new Color(0, 0, 0));
+            bi.drawString(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")), 206, 10 + yoffset);
+            bi.dispose();
+            getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
+
+            // Via
+            bi = bufferedImage.createGraphics();
+            bi.setFont(fontvia);
+            bi.setColor(Color.WHITE);
+            if (via < 10) {
+                bi.drawString(String.valueOf(via), 14, 26 + yoffset);
+            } else {
+                bi.drawString("" + via, 5, 26 + yoffset);
+            }
+            bi.dispose();
+            getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
+
+            // Si marca és buida, no mostrar res
+            String t1 = "", t2 = "";
+            if (marca != null) {
+                try {
+                    // TAV
+                    if (linia.contains("TAV")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/TAV.png"), 49, 30);
+                        t1 = "Alta Velocitat";
+                    }
+                    // ALV
+                    else if (linia.contains("ALV")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/ALV.png"), 49, 30);
+                        t1 = "Alvia";
+                        t2 = "Regional d'Alta Velocitat";
+                    }
+                    // ROD
+                    else if (linia.contains("RB") || linia.contains("RV") || linia.contains("RP")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/ROD.png"), 49, 30);
+                        t1 = "Rodalies";
+                        if (     linia.contains("RB")) t2 = "Àrea de: Nova Barcelona";
+                        else if (linia.contains("RV")) t2 = "Àrea de: Vèlia";
+                        else if (linia.contains("RP")) t2 = "Àrea de: Perpinyà";
+                    }
+                    // TLL
+                    else if (linia.contains("TLL")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "28px/TLL.png"), 49, 30);
+                        t1 = "Tren Lleuger";
+                    }
+                    // TB
+                    else if (linia.contains("TB")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/TB.png"), 49, 30);
+                        t1 = "Tren Blanc";
+                        t2 = "Servei hivernal";
+                    }
+                    // LD
+                    else if (linia.contains("LD")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/LD.png"), 49, 30);
+                        t1 = "Llarga Distància";
+                    }
+                    // REG
+                    else if (linia.contains("R")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/REG.png"), 49, 30);
+                        t1 = "Regional";
+                        if (Objects.equals(tipus, "REX")) {
+                            t2 = "Exprés";
+                        }
+                    }
+                    // ESP
+                    else if (linia.contains("ESP") || linia.contains("ESPECIAL")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/ESP.png"), 49, 30);
+                        t1 = "Tren Especial";
+                    }
+                    // SUB
+                    else if (linia.contains("S")) {
+                        getLayer(2).draw(Assets.getMapTexture(imgDir + "56x28px/SUB.png"), 49, 30);
+                        t1 = "Suburbà";
+                    }
+                } catch (Exception e) {
+                    //getLogger().info("Error al carregar imatge: valor de linia \"" + linia + "\" incorrecte." + "\n" + e.getMessage());
+                }
+
+                // Textos addicionals
+                bi = bufferedImage.createGraphics();
+                bi.setFont(plainfont);
+                bi.setColor(Color.BLACK);
+                if (!t2.equals("")) {
+                    bi.drawString(t1, 49 + (28 * 2 + 3) + 3, 30 + (28 / 2) - 3);
+                    bi.drawString(t2, 49 + (28 * 2 + 3) + 3, 30 + (28 / 2) + 14 - 3);
+                } else if (!t1.equals("")) {
+                    bi.drawString(t1, 49 + (28 * 2 + 3) + 3, 30 + (28 / 2) + 3);
+                }
+                bi.dispose();
+                getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
+
+                // Destinació
+                bi = bufferedImage.createGraphics();
+                bi.setFont(boldfont);
+                bi.setColor(Color.BLACK);
+                bi.drawString(destination[1], 50, 61 + yoffset);
+                bi.drawString(destination[2], 50, 75 + yoffset);
+                bi.dispose();
+                getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
+
+                // Info Línia
+                bi = bufferedImage.createGraphics();
+                bi.setFont(plainfont);
+                bi.setColor(Color.BLACK);
+
+                int pos1 = 0;
+                if (infoLinia.size() > 0)
+                    pos1 = cicleCounter % infoLinia.size();
+                int pos2 = 0;
+
+                if (infoLinia.size() > 2) {
+                    bi.drawString(infoLinia.get(pos1), 50, 94 + yoffset);
+                    if (((cicleCounter % infoLinia.size()) + 1) < infoLinia.size()) {
+                        pos2 = (cicleCounter % infoLinia.size()) + 1;
+                    }
+                    if (pos1 != pos2) {
+                        bi.drawString(infoLinia.get(pos2), 50, 108 + yoffset);
+                    }
+                } else if (infoLinia.size() > 1) {
+                    bi.drawString(infoLinia.get(0), 50, 94 + yoffset);
+                    bi.drawString(infoLinia.get(1), 50, 108 + yoffset);
+                } else if (infoLinia.size() > 0) {
+                    bi.drawString(infoLinia.get(0), 50, 94 + yoffset);
+                }
+
+                bi.dispose();
+                getLayer(2).draw(MapTexture.fromImage(bufferedImage), 0, 0);
+            }
+
+            // Cada cop que tickCounter arriba a 60 (3 segons), incrementa cicleCounter
+            tickCounter++;
+            if (tickCounter >= 60) {
+                tickCounter = 0;
+                cicleCounter++;
+
+                // Si cicleCounter arriba a 2520 (MCM de 2, 3, 4, 5, 6, 7, 8, 9 i 10
+                if (cicleCounter >= 2520) {
+                    cicleCounter = 0;
+                }
+            }
+
+            super.onTick();
+        }
+
+    }
+
+    public static class SignLinkDisplay3 extends MapDisplay {
+        static String imgDir = "img/";
+        String signLinkVariable = "";
+        String[] destination = {"", "", ""}; // 0: Complet , 1: Línia text 1 , 2: Línia text 2
+        String linia = "";
+        String marca = "";
+        String tipus = "";
+        //String[] infoLinia = {"", "", ""}; // 0: Complet , 1: Línia text 1 , 2: Línia text 2
+        Vector<String> infoLinia = new Vector<String>();
+        int codiEstacio = 0;
+        int via = 0;
+        int tickCounter = 0;
+        int cicleCounter = 0;
+
+        private static Font fontvia;
+        private static Font boldfont;
+        private static Font plainfont;
+
+        @Override
+        public void onAttached() {
+            signLinkVariable = properties.get("variable", String.class, "");
+            destination[0] = properties.get("destination", String.class, "");
+
+            fontvia = new Font("helvetica", Font.PLAIN, 32);
+            boldfont = new Font("Helvetica", Font.BOLD, 15);
+            plainfont = new Font("Helvetica", Font.PLAIN, 12);
+
+            getLayer(1).draw(Assets.getMapTexture(imgDir + "SLDisplay3.png"), 0, 0);
+            setUpdateWithoutViewers(false);
+            super.onAttached();
+        }
+
+        @Override
+        public void onTick() {
+            getLayer(2).clear();
+
+            /*
+             * Variable: XFG000V0
+             *           01234567
+             *  Nom:     XFG000V0N
+             *           012345678
+             * Destin.:  XFG000V0D
+             *           012345678
+             */
+
+            // Comprovar que és una estació de la XFG o de TLL
+            if ((signLinkVariable.contains("XFG") && signLinkVariable.contains("V")) ||
+                    (signLinkVariable.contains("TLL") && signLinkVariable.contains("V"))) {
+                // Llegir codi de l'estació
+                codiEstacio = Integer.parseInt(signLinkVariable.substring(3, 6));
+                // Llegir via
+                via = Integer.parseInt(signLinkVariable.substring(6).replace("V", ""));
+                // Llegir destinació
+                destination[0] = Variables.get(signLinkVariable + "D").getDefault();
+                destination[0] = Variables.get(destination[0].replace("%", "")).getDefault();
+                int maxDest = 27;
+                if (destination[0].length() > maxDest) {
+                    //destination[1] = destination[0].substring(0, 24);
+                    //destination[2] = destination[0].substring(24);
+
+                    // Si l'últim caràcter no és un espai, buscar l'últim espai abans de maxDest
+                    if (destination[0].charAt(maxDest - 1) != ' ') {
+                        int pos = destination[0].substring(0, maxDest).lastIndexOf(' ');
+                        destination[1] = destination[0].substring(0, pos);
+                        destination[2] = destination[0].substring(pos + 1);
+                    } else {
+                        destination[1] = destination[0].substring(0, maxDest);
+                        destination[2] = destination[0].substring(maxDest);
+                    }
+                } else {
+                    destination[1] = destination[0];
+                    destination[2] = "";
+                }
+                // Llegir línia
+                String varNom = Variables.get(signLinkVariable + "N").getDefault();
+                linia = varNom
+                        .replace("%", "")
+                        .replace("<", "")
+                        .replace(">", "");
+
                 /*String numLiniaS = linia
                         .replace("ESPECIAL", "")
                         .replace("TAV", "")
@@ -160,7 +463,7 @@ public class SignLinkDisplays {
                     marca = "";
                     tipus = "";
                 } else if (linia.contains("TAV") ||linia.contains("ALV") ||
-                           linia.contains("S") || linia.contains("LD")) {
+                        linia.contains("S") || linia.contains("LD")) {
                     marca = "FGC";
                     tipus = "";
                 } else if ((linia.contains("RB")) || (linia.contains("RV"))) {

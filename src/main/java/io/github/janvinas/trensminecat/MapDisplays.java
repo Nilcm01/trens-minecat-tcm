@@ -419,7 +419,6 @@ public class MapDisplays {
 
     public static class DepartureBoard6 extends MapDisplay {
         int tickCount = 0;
-        final int maxAcceptableDelay = 20; //time in seconds
 
         @Override
         public void onAttached() {
@@ -427,6 +426,146 @@ public class MapDisplays {
             setUpdateWithoutViewers(false);
             getLayer(0).clear();
             getLayer(0).draw(loadTexture(imgDir + "DepartureBoard6.png"), 0, 0);
+        }
+
+        @Override
+        public void onTick() {
+
+            int yoffset = 12;
+
+            LocalDateTime now = LocalDateTime.now();
+            getLayer(2).clear();
+            getLayer(2).setAlignment(MapFont.Alignment.LEFT);
+            BufferedImage bufferedImageL2 = new BufferedImage(384, 256, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D biL2 = bufferedImageL2.createGraphics();
+            biL2.setFont(TrensMinecat.minecraftiaJavaFont);
+            biL2.setColor(Color.BLACK);
+            biL2.drawString(now.format(DateTimeFormatter.ofPattern("HH:mm:ss")), 336, 7+yoffset);
+            biL2.dispose();
+            getLayer(2).draw(MapTexture.fromImage(bufferedImageL2), 0, 0);
+
+            if (Objects.equals(properties.get("template", String.class, ""), "")) {
+                // No template or platform specified
+                // > Do nothing (at least for now)
+
+            } else if ((tickCount % updateTime) == 0) {
+                DepartureBoardTemplate template = TrensMinecat.departureBoards.get(properties.get("template", String.class));
+                String andana = properties.get("platform", String.class, "");
+                TreeMap<LocalDateTime, Departure> departureBoardTrains = BoardUtils.fillDepartureBoard(now, template.trainLines, template.length, properties.get("template", String.class), false);
+                TreeMap<LocalDateTime, Departure> departures = new TreeMap<>();
+
+                if (!andana.equals("")) {
+                    departureBoardTrains.forEach((time, departure) -> {
+                        if (!departure.platform.equals(andana)) departures.put(time, departure);
+                    });
+                } else {
+                    departures.putAll(departureBoardTrains);
+                }
+
+                //print train lines on screen
+                getLayer(1).clear();
+                getLayer(1).setAlignment(MapFont.Alignment.LEFT);
+                BufferedImage bufferedImageL1 = new BufferedImage(384, 256, BufferedImage.TYPE_INT_ARGB);
+                Graphics2D biL1 = bufferedImageL1.createGraphics();
+                biL1.setFont(TrensMinecat.minecraftiaJavaFont);
+                biL1.setColor(Color.BLACK);
+
+                int i = 0;
+                for (LocalDateTime departureTime : departures.keySet()) {
+                    if (i > template.length) break;
+                    // UNUSED // Duration untilDeparture = Duration.between(now, departureTime);
+                    Departure departure = departures.get(departureTime);
+
+
+                    //// LÍNIA
+
+                    int x = 1, y = 32 + i*14;
+
+                    // TAV
+                    if (departure.name.contains("TAV"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/TAV.png"), x, y);
+                        // ALV
+                    else if (departure.name.contains("ALV"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/ALV.png"), x, y);
+                        // ROD
+                    else if (departure.name.contains("ROD") || departure.name.contains("RB") || departure.name.contains("RV"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/ROD.png"), x, y);
+                        // TLL
+                    else if (departure.name.contains("TLL"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "11px/TLL.png"), x + 7, y + 1);
+                        // TB
+                    else if (departure.name.contains("TB"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/TB.png"), x, y);
+                        // LD
+                    else if (departure.name.contains("LD"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/LD.png"), x, y);
+                        // REG
+                    else if (departure.name.contains("REG") || departure.name.contains("R"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/REG.png"), x, y);
+                        // ESP
+                    else if (departure.name.contains("ESP"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/ESP.png"), x, y);
+                        // SUB
+                    else if (departure.name.contains("SUB") || departure.name.contains("S"))
+                        getLayer(1).draw(Assets.getMapTexture(imgDir + "24x13px/SUB.png"), x, y);
+
+
+                    //// DESTINACIÓ
+
+                    String destination = departure.destination;
+                    if (!destination.equals("_")) {
+                        biL1.drawString(departure.destination, 27, 35 + i*14 + yoffset);
+                        //getLayer(1).draw(MapFont.MINECRAFT, 27, 35 + i * 14,
+                        //        MapColorPalette.getColor(0, 0, 0),
+                        //        departure.destination);
+                    }
+
+
+                    //// VIA
+
+                    String platform = departure.platform;
+                    int platformX = 173;
+                    if (Integer.parseInt(platform) >= 10) platformX -= 3;
+                    if (!platform.equals("_")) {
+                        biL1.drawString(departure.platform, platformX, 35 + i*14 + yoffset);
+                        //getLayer(1).draw(MapFont.MINECRAFT, platformX, 35 + i * 14,
+                        //        MapColorPalette.getColor(0, 0, 0),
+                        //        departure.platform);
+                    }
+
+
+                    //// OBSERVACIONS
+
+                    String information = departure.information;
+                    if (!information.equals("_")) {
+                        biL1.drawString(departure.information, 186, 35 + i*14 + yoffset);
+                        //getLayer(1).draw(MapFont.MINECRAFT, 186, 35 + i * 14,
+                        //        MapColorPalette.getColor(0, 0, 0),
+                        //        departure.information);
+                    }
+                    i++;
+                }
+
+                biL1.dispose();
+                getLayer(1).draw(MapTexture.fromImage(bufferedImageL1), 0, 0);
+            }
+
+            tickCount++;
+            super.onTick();
+        }
+
+    }
+
+    public static class DepartureBoard7 extends MapDisplay {
+        int tickCount = 0;
+        final int maxAcceptableDelay = 20; //time in seconds
+
+        @Override
+        public void onAttached() {
+            super.onAttached();
+            setUpdateWithoutViewers(false);
+            getLayer(0).clear();
+            getLayer(0).draw(loadTexture(imgDir + "DepartureBoard7.png"), 0, 0);
         }
 
         @Override

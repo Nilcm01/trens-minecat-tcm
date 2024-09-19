@@ -179,48 +179,17 @@ public class TrensMinecat extends JavaPlugin {
                     }else if(args[2].equalsIgnoreCase("5")){
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard5.class);
                     }else if(args[2].equalsIgnoreCase("6")){
-                        // DISPLAY 6: TCM-ADIF
+                        // DISPLAY 6: TCM-ADIF FGC-UNIFICAT
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard6.class);
-
                         ((Player) sender).getInventory().addItem(display);
-
-                        // Wait 1 second
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
-
-                        if(!heldItem.getType().equals(Material.FILLED_MAP)){
-                            sender.sendMessage(ChatColor.RED + "ERROR 01: Agafa el mapa amb la mà dreta per configurar-lo.");
-                            return true;
-                        }
-                        MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
-
-                        // Wait 1 second
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        if(cartell == null){
-                            sender.sendMessage(ChatColor.RED + "ERROR 02 : No hi ha cap pantalla vinculada a aquest mapa.");
-                            return true;
-                        }
-
-                        cartell.properties.set("template", template);
-                        cartell.properties.set("name", name);
-                        cartell.properties.set("platform", "");
-
-                        cartell.restartDisplay();
-
-                        sender.sendMessage(ChatColor.AQUA + "S'ha creat el display.");
-
+                        sender.sendMessage(ChatColor.AQUA + "S'ha creat un display 6.");
                         return true;
-
+                    }else if(args[2].equalsIgnoreCase("7")){
+                        // DISPLAY 7: TCM-ADIF
+                        display = MapDisplay.createMapItem(MapDisplays.DepartureBoard7.class);
+                        ((Player) sender).getInventory().addItem(display);
+                        sender.sendMessage(ChatColor.AQUA + "S'ha creat un display 7.");
+                        return true;
                     }else{
                         sender.sendMessage("The display with ID " + args[2] + " does not exist");
                         return false;
@@ -287,6 +256,10 @@ public class TrensMinecat extends JavaPlugin {
                         return true;
                     }else if(args[2].equalsIgnoreCase("2")) {
                         display = MapDisplay.createMapItem(SignLinkDisplays.SignLinkDisplay2.class);
+                        ((Player) sender).getInventory().addItem(display);
+                        return true;
+                    }else if(args[2].equalsIgnoreCase("3")) {
+                        display = MapDisplay.createMapItem(SignLinkDisplays.SignLinkDisplay3.class);
                         ((Player) sender).getInventory().addItem(display);
                         return true;
                     }
