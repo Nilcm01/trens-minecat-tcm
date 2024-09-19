@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 
+import static io.github.janvinas.trensminecat.CartellCarretera.CartellCarretera1.MAX_TEXT;
+
 public class TrensMinecat extends JavaPlugin {
 
     static HashMap<String, DepartureBoardTemplate> departureBoards = new HashMap<>();
@@ -136,6 +138,18 @@ public class TrensMinecat extends JavaPlugin {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+        // CartellCarretera
+        if (args.length > 1) {
+            if(     command.getName().equalsIgnoreCase("trensminecat") &&
+                    (args[0].equalsIgnoreCase("cartellcarretera") ||
+                            args[0].equalsIgnoreCase("cc"))) {
+
+                String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
+
+                return onCommandCartellCarretera(sender, command, label, newArgs);
+            }
+        }
+
         if(command.getName().equalsIgnoreCase("trensminecat") && args.length == 5 && args[0].equalsIgnoreCase("spawn")){
             List<SpawnSign> signs = TrainCarts.plugin.getSpawnSignManager().getSigns();
             for (SpawnSign sign : signs){
@@ -165,7 +179,48 @@ public class TrensMinecat extends JavaPlugin {
                     }else if(args[2].equalsIgnoreCase("5")){
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard5.class);
                     }else if(args[2].equalsIgnoreCase("6")){
+                        // DISPLAY 6: TCM-ADIF
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard6.class);
+
+                        ((Player) sender).getInventory().addItem(display);
+
+                        // Wait 1 second
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+
+                        if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                            sender.sendMessage(ChatColor.RED + "ERROR 01: Agafa el mapa amb la mà dreta per configurar-lo.");
+                            return true;
+                        }
+                        MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+
+                        // Wait 1 second
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+
+                        if(cartell == null){
+                            sender.sendMessage(ChatColor.RED + "ERROR 02 : No hi ha cap pantalla vinculada a aquest mapa.");
+                            return true;
+                        }
+
+                        cartell.properties.set("template", template);
+                        cartell.properties.set("name", name);
+                        cartell.properties.set("platform", "");
+
+                        cartell.restartDisplay();
+
+                        sender.sendMessage(ChatColor.AQUA + "S'ha creat el display.");
+
+                        return true;
+
                     }else{
                         sender.sendMessage("The display with ID " + args[2] + " does not exist");
                         return false;
@@ -320,6 +375,27 @@ public class TrensMinecat extends JavaPlugin {
                         sender.sendMessage(ChatColor.AQUA + "S'ha configurat \"variable\" = " + args[3]);
                     }else{
                         sender.sendMessage("Propietat desconeguda o argument incorrecte");
+                    }
+
+                    mapDisplay.restartDisplay();
+                    return true;
+                }else if (args[1].equalsIgnoreCase("display")){
+                    if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                        sender.sendMessage(ChatColor.RED + "Agafa el mapa amb la mà dreta per configurar-lo");
+                        return true;
+                    }
+                    MapDisplay mapDisplay = MapDisplay.getHeldDisplay((Player) sender);
+                    if(mapDisplay == null){
+                        sender.sendMessage(ChatColor.RED + "No hi ha cap pantalla vinculada a aquest mapa!");
+                        return true;
+                    }
+
+                    if(args.length == 3){
+                        mapDisplay.properties.set("template", args[2]);
+                        mapDisplay.properties.set("name", args[2]);
+                        sender.sendMessage(ChatColor.AQUA + "S'ha configurat = " + args[2]);
+                    }else{
+                        sender.sendMessage("Argument incorrecte");
                     }
 
                     mapDisplay.restartDisplay();
@@ -521,6 +597,237 @@ public class TrensMinecat extends JavaPlugin {
         }
 
         return options;
+    }
+
+    public boolean onCommandCartellCarretera(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+
+        sender.sendMessage(ChatColor.AQUA + "CartellCarretera");
+
+        // COMMAND STRUCTURE
+
+        //// ---- CREAR -----
+        // x command    : cartellcarretera , cc
+        // 0 crear      : crear
+        if (args[0].equalsIgnoreCase("crear")) {
+            ItemStack cartell;
+            cartell = MapDisplay.createMapItem(CartellCarretera.CartellCarretera1.class);
+            ((Player) sender).getInventory().addItem(cartell);
+
+            sender.sendMessage(ChatColor.AQUA + "-- CREAR");
+            return true;
+        }
+
+
+        //// ---- CONFIG -----
+        // x command    : cartellcarretera , cc
+        // 0 config     : config
+        // 1 ample      : (float >= 1)
+        // 2 alt        : (float >= 1)
+        // 3 color      : autovia , nacional , comarcal , urbana , municipi
+        // 4 tipus      : buit , kms , sortida
+        if (args[0].equalsIgnoreCase("config") && args.length == 5) {
+
+            ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+
+            if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                sender.sendMessage(ChatColor.RED + "Agafa el mapa amb la mà dreta per configurar-lo");
+                return true;
+            }
+            MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+            if(cartell == null){
+                sender.sendMessage(ChatColor.RED + "No hi ha cap pantalla vinculada a aquest mapa!");
+                return true;
+            }
+
+            cartell.properties.set("ample", args[1]);
+            cartell.properties.set("alt", args[2]);
+
+            if (    args[2].equalsIgnoreCase("autovia")  ||
+                    args[2].equalsIgnoreCase("nacional") ||
+                    args[2].equalsIgnoreCase("comarcal") ||
+                    args[2].equalsIgnoreCase("urbana")   ||
+                    args[2].equalsIgnoreCase("municipi") ||
+                    // Colors genèrics
+                    // groc, lila, blau, vermell, verd, taronja, rosa
+                    args[2].equalsIgnoreCase("groc") ||
+                    args[2].equalsIgnoreCase("lila") ||
+                    args[2].equalsIgnoreCase("blau") ||
+                    args[2].equalsIgnoreCase("vermell") ||
+                    args[2].equalsIgnoreCase("verd") ||
+                    args[2].equalsIgnoreCase("taronja") ||
+                    args[2].equalsIgnoreCase("rosa"))
+                cartell.properties.set("color", args[3]);
+            else return true;
+
+            if (args[4].equalsIgnoreCase("buit") ||
+                args[4].equalsIgnoreCase("kms") ||
+                args[4].equalsIgnoreCase("sortida"))
+                cartell.properties.set("tipus", args[4]);
+            else return true;
+
+            cartell.restartDisplay();
+
+            sender.sendMessage(ChatColor.AQUA + "-- CONFIG");
+            return true;
+        }
+
+
+        //// ---- EDITAR -----
+        // x command    : cartellcarretera , cc
+        // 0 editar     : editar
+        // 1 paràmetre  : mida , color , tipus , fletxes , text
+        // 2 ...
+        if (args[0].equalsIgnoreCase("editar") && args.length > 2) {
+
+            ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+
+            if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                sender.sendMessage(ChatColor.RED + "Agafa el mapa amb la mà dreta per configurar-lo");
+                return true;
+            }
+            MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+            if(cartell == null){
+                sender.sendMessage(ChatColor.RED + "No hi ha cap pantalla vinculada a aquest mapa!");
+                return true;
+            }
+
+            switch (args[1]) {
+                case "mida":
+                    if (args.length < 4) return true;
+
+                    cartell.properties.set("ample", args[2]);
+                    cartell.properties.set("alt", args[3]);
+
+                    break;
+
+                case "color":
+
+                    if (    args[2].equalsIgnoreCase("autovia")  ||
+                            args[2].equalsIgnoreCase("nacional") ||
+                            args[2].equalsIgnoreCase("comarcal") ||
+                            args[2].equalsIgnoreCase("urbana")   ||
+                            args[2].equalsIgnoreCase("municipi") ||
+                            // Colors genèrics
+                            // groc, lila, blau, vermell, verd, taronja, rosa
+                            args[2].equalsIgnoreCase("groc") ||
+                            args[2].equalsIgnoreCase("lila") ||
+                            args[2].equalsIgnoreCase("blau") ||
+                            args[2].equalsIgnoreCase("vermell") ||
+                            args[2].equalsIgnoreCase("verd") ||
+                            args[2].equalsIgnoreCase("taronja") ||
+                            args[2].equalsIgnoreCase("rosa"))
+                        cartell.properties.set("color", args[2]);
+                    else return true;
+
+                    break;
+
+                case "tipus":
+
+                    if (    args[2].equalsIgnoreCase("buit")    ||
+                            args[2].equalsIgnoreCase("kms")     ||
+                            args[2].equalsIgnoreCase("sortida") )
+                        cartell.properties.set("tipus", args[2]);
+                    else return true;
+
+                    break;
+
+                case "fletxes":
+
+                    // 2 : ubicació (0-7, 1/8 en sentit horari)
+                    // 3 : num fletxes
+                    // 4 : orientació num_num_... (0-7, 1/8 en sentit horari)
+
+                    if (args.length < 5) return true;
+
+                    // Si el nombre de fletxes (args[3]) no coincideix amb el nombre d'orientacions (args[4].split("_").length), no es permet
+                    if (args[4].split("_").length != Integer.parseInt(args[3])) {
+                        // Si el nombre de fletxes (args[3]) és 0, orientació (args[4]) serà null
+                        if (Integer.parseInt(args[3]) == 0) {
+                            args[4] = null;
+                        } else {
+                            sender.sendMessage(ChatColor.RED + "El nombre d'orientacions no coincideix amb el nombre de fletxes");
+                            return true;
+                        }
+                    }
+
+                    cartell.properties.set("fletxes_ubicacio", args[2]);
+                    cartell.properties.set("fletxes_num", args[3]);
+                    cartell.properties.set("fletxes_orientacio", args[4]);
+
+                    break;
+
+                case "text":
+
+                    // 2 : num línia
+                    // 3+ : text  // "_" -> buidar
+
+                    if (args.length < 4) return true;
+
+                    // El text de les línies s'escriu per comanda amb espais.
+                    // Cada espai Java entén que és un nou argument,
+                    // i per aquest motiu es concatenen tots els arguments
+                    // des del 3 (inclòs) per formar el text tal com era.
+
+                    StringBuilder text = new StringBuilder();
+                    for (int i=3; i < args.length; i++) {
+                        text.append(" ");
+                        text.append(args[i]);
+                    }
+                    cartell.properties.set("text_" + args[2], text.toString());
+
+                    break;
+            }
+
+            cartell.restartDisplay();
+
+            sender.sendMessage(ChatColor.AQUA + "-- EDITAR");
+            return true;
+        }
+
+
+        //// ---- INFO -----
+        // x command    : cartellcarretera , cc
+        // 0 editar     : info / i
+        if (args[0].equalsIgnoreCase("info") || args[0].equalsIgnoreCase("i")) {
+            ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+
+            if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                sender.sendMessage(ChatColor.RED + "Agafa el mapa amb la mà dreta per configurar-lo");
+                return true;
+            }
+            MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+            if(cartell == null){
+                sender.sendMessage(ChatColor.RED + "No hi ha cap pantalla vinculada a aquest mapa!");
+                return true;
+            }
+
+            sender.sendMessage(ChatColor.AQUA + "-- INFO");
+
+            java.util.Vector<String> info = new java.util.Vector<String>();
+            info.add(ChatColor.YELLOW + "Ample: " + ChatColor.WHITE + cartell.properties.get("ample", Float.class, null) + " blocs");
+            info.add(ChatColor.YELLOW + "Alt: " + ChatColor.WHITE + cartell.properties.get("alt", Float.class, null) + " blocs");
+            info.add(ChatColor.YELLOW + "Color: " + ChatColor.WHITE + cartell.properties.get("color", String.class, null));
+            info.add(ChatColor.YELLOW + "Tipus: " + ChatColor.WHITE + cartell.properties.get("tipus", String.class, null));
+            info.add(ChatColor.YELLOW + "Text:\n");
+            for (int i = 0; i < MAX_TEXT; i++) {
+                String l = cartell.properties.get("text_" + (i+1), String.class, null);
+                info.add(ChatColor.GREEN + "" + (i+1) + ": " + ChatColor.WHITE + l + "\n");
+            }
+            info.add(ChatColor.YELLOW + "Fletxes:");
+            info.add(ChatColor.GREEN + "Ubicació: " + ChatColor.WHITE + cartell.properties.get("fletxes_ubicacio", Integer.class, null));
+            info.add(ChatColor.GREEN + "Quantitat: " + ChatColor.WHITE + cartell.properties.get("fletxes_num", Integer.class, null));
+            info.add(ChatColor.GREEN + "Orientació: " + ChatColor.WHITE + cartell.properties.get("fletxes_orientacio", String.class, null));
+
+
+            for (String l : info) {
+                sender.sendMessage(l);
+            }
+
+            return true;
+        }
+
+
+        return true;
     }
 
     @Override

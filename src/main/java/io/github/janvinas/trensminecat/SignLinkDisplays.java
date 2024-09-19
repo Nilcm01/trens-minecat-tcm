@@ -187,7 +187,7 @@ public class SignLinkDisplays {
                 infoLinia.clear();
                 infoLinia.add(Variables.get(varInfoLinia).getDefault());
 
-                int maxInfo = 38;
+                int maxInfo = 35;
                 // Si la línia és més llarga que maxInfo, dividir-ne el restant amb la de sota. Repetir fins que la última línia sigui menor que maxInfo
                 while (infoLinia.lastElement().length() > maxInfo) {
                     // Buscar l'últim espai abans de maxInfo

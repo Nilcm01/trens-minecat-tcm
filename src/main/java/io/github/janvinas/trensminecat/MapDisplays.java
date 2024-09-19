@@ -445,7 +445,11 @@ public class MapDisplays {
             biL2.dispose();
             getLayer(2).draw(MapTexture.fromImage(bufferedImageL2), 0, 0);
 
-            if ((tickCount % updateTime) == 0) {
+            if (Objects.equals(properties.get("template", String.class, ""), "")) {
+                // No template or platform specified
+                // > Do nothing (at least for now)
+
+            } else if ((tickCount % updateTime) == 0) {
                 DepartureBoardTemplate template = TrensMinecat.departureBoards.get(properties.get("template", String.class));
                 String andana = properties.get("platform", String.class, "");
                 TreeMap<LocalDateTime, Departure> departureBoardTrains = BoardUtils.fillDepartureBoard(now, template.trainLines, template.length, properties.get("template", String.class), false);
