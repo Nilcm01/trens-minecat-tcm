@@ -87,6 +87,7 @@ public class CartellCarretera {
         // destins  : Via a dalt i destinacions a baix
         // sortida  : Indicació de sortida
         String tipus = "nacional";
+        String color = "nacional";
 
 
 
@@ -192,7 +193,6 @@ public class CartellCarretera {
 
         String color_icones = COLOR_ICONES_NACIONAL;
 
-
         @Override
         public void onAttached() {
             fontstd = new Font("transport-heavy", Font.PLAIN, FONT_SIZE);
@@ -208,7 +208,7 @@ public class CartellCarretera {
         private void updateProperties() {
             this.ample = properties.get("ample", Float.class, 1.0f);
             this.alt = properties.get("alt", Float.class, 1.0f);
-            String color = properties.get("color", String.class, "nacional");
+            this.color = properties.get("color", String.class, "nacional");
             this.tipus = properties.get("tipus", String.class, "buit");
 
             switch (color) {
@@ -715,7 +715,76 @@ public class CartellCarretera {
         }
 
 
+        /*
+        float ample -- property
+        float alt -- property
+        int fletxes_posicio -- property
+        Vector<Integer> fletxes
+        Vector<String> text
+        String tipus -- property
+        String color -- property
+         */
 
+        public float getAmple() {
+            return ample;
+        }
+
+        public void setAmple(float ample) {
+            this.properties.set("ample", ample);
+            this.ample = ample;
+        }
+
+        public float getAlt() {
+            return alt;
+        }
+
+        public void setAlt(float alt) {
+            this.properties.set("alt", alt);
+            this.alt = alt;
+        }
+
+        public int getFletxesPosicio() {
+            return fletxes_posicio;
+        }
+
+        public void setFletxesPosicio(int fletxes_posicio) {
+            this.properties.set("fletxes_posicio", fletxes_posicio);
+            this.fletxes_posicio = fletxes_posicio;
+        }
+
+        public Vector<Integer> getFletxes() {
+            return fletxes;
+        }
+
+        public void setFletxes(Vector<Integer> fletxes) {
+            this.fletxes = fletxes;
+        }
+
+        public Vector<String> getText() {
+            return text;
+        }
+
+        public void setText(Vector<String> text) {
+            this.text = text;
+        }
+
+        public String getTipus() {
+            return tipus;
+        }
+
+        public void setTipus(String tipus) {
+            this.properties.set("tipus", tipus);
+            this.tipus = tipus;
+        }
+
+        public String getColor() {
+            return color;
+        }
+
+        public void setColor(String color) {
+            this.properties.set("color", color);
+            this.color = color;
+        }
     }
 
 }

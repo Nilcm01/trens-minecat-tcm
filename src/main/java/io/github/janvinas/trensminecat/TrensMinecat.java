@@ -19,6 +19,7 @@ import io.github.janvinas.trensminecat.signactions.*;
 import io.github.janvinas.trensminecat.trainTracker.TrackedStation;
 import io.github.janvinas.trensminecat.trainTracker.TrackedTrain;
 import io.github.janvinas.trensminecat.trainTracker.TrainTracker;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -49,11 +50,17 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 
 import static io.github.janvinas.trensminecat.CartellCarretera.CartellCarretera1.MAX_TEXT;
+import static io.github.janvinas.trensminecat.CartellCarretera.CartellCarretera1.imgDir;
 
 public class TrensMinecat extends JavaPlugin {
 
     static HashMap<String, DepartureBoardTemplate> departureBoards = new HashMap<>();
     static Integer secondsToDisplayOnBoard;
+
+    static java.util.Vector<SpawnerData> spawnerData = new java.util.Vector<>();
+
+    static String trainWorldName;
+    static int trainSpawnDelay;
 
     int trainDestroyDelay;
     String dontDestroyTag;
@@ -66,6 +73,8 @@ public class TrensMinecat extends JavaPlugin {
     public TrainTracker trainTracker = new TrainTracker();
 
     int port = 8176;
+
+    MapDisplay clipboardMapDisplay = null;
 
 
     @Override
@@ -134,6 +143,9 @@ public class TrensMinecat extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Error inicialitzant el servidor web al port " + port);
             e.printStackTrace();
         }
+
+        // Automatic spawn of trains
+        getServer().getScheduler().scheduleSyncRepeatingTask(this, this::automaticSpawner, trainSpawnDelay * 20L, 20);
     }
 
     @Override
@@ -182,12 +194,64 @@ public class TrensMinecat extends JavaPlugin {
                         // DISPLAY 6: TCM-ADIF FGC-UNIFICAT
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard6.class);
                         ((Player) sender).getInventory().addItem(display);
+                        // Wait 1 second
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+                        if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                            sender.sendMessage(ChatColor.RED + "ERROR 01: Agafa el mapa amb la mà dreta per configurar-lo.");
+                            return true;
+                        }
+                        MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+                        // Wait 1 second
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if(cartell == null){
+                            sender.sendMessage(ChatColor.RED + "ERROR 02 : No hi ha cap pantalla vinculada a aquest mapa.");
+                            return true;
+                        }
+                        cartell.properties.set("template", template);
+                        cartell.properties.set("name", name);
+                        cartell.properties.set("platform", "");
+                        cartell.restartDisplay();
                         sender.sendMessage(ChatColor.AQUA + "S'ha creat un display 6.");
                         return true;
                     }else if(args[2].equalsIgnoreCase("7")){
                         // DISPLAY 7: TCM-ADIF
                         display = MapDisplay.createMapItem(MapDisplays.DepartureBoard7.class);
                         ((Player) sender).getInventory().addItem(display);
+                        // Wait 1 second
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+                        if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                            sender.sendMessage(ChatColor.RED + "ERROR 01: Agafa el mapa amb la mà dreta per configurar-lo.");
+                            return true;
+                        }
+                        MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+                        // Wait 1 second
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        if(cartell == null){
+                            sender.sendMessage(ChatColor.RED + "ERROR 02 : No hi ha cap pantalla vinculada a aquest mapa.");
+                            return true;
+                        }
+                        cartell.properties.set("template", template);
+                        cartell.properties.set("name", name);
+                        cartell.properties.set("platform", "");
+                        cartell.restartDisplay();
                         sender.sendMessage(ChatColor.AQUA + "S'ha creat un display 7.");
                         return true;
                     }else{
@@ -590,6 +654,75 @@ public class TrensMinecat extends JavaPlugin {
             return true;
         }
 
+        //// ---- COPIAR -----
+        // x command    : cartellcarretera , cc
+        // 0 copiar     : copiar
+        if (args[0].equalsIgnoreCase("copiar")) {
+            // Agafa el que ja està configurat
+            ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+            if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                sender.sendMessage(ChatColor.RED + "Agafa el mapa amb la mà dreta per configurar-lo");
+                return true;
+            }
+            MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+            if(cartell == null){
+                sender.sendMessage(ChatColor.RED + "No hi ha cap pantalla vinculada a aquest mapa!");
+                return true;
+            }
+
+            clipboardMapDisplay = cartell;
+
+            // Final
+            sender.sendMessage(ChatColor.AQUA + "CC: Mapa copiat");
+            return true;
+        }
+
+        // ---- ENGANXAR -----
+        // x command    : cartellcarretera , cc
+        // 0 enganxar   : enganxar
+        if (args[0].equalsIgnoreCase("enganxar")) {
+            // Llegeix el blanc
+            ItemStack heldItem = ((Player) sender).getInventory().getItemInMainHand();
+            if(!heldItem.getType().equals(Material.FILLED_MAP)){
+                sender.sendMessage(ChatColor.RED + "Agafa el mapa amb la mà dreta per configurar-lo");
+                return true;
+            }
+            MapDisplay cartell = MapDisplay.getHeldDisplay((Player) sender);
+            if(cartell == null){
+                sender.sendMessage(ChatColor.RED + "No hi ha cap pantalla vinculada a aquest mapa!");
+                return true;
+            }
+
+            // Copia les propietats
+            /*
+                float ample
+                float alt
+                String fletxes_ubicacio
+                int fletxes_num
+                String fletxes_orientacio
+                String tipus
+                String color
+                String text_#
+            */
+            cartell.properties.set("ample", clipboardMapDisplay.properties.get("ample", Float.class, null));
+            cartell.properties.set("alt", clipboardMapDisplay.properties.get("alt", Float.class, null));
+            cartell.properties.set("fletxes_ubicacio", clipboardMapDisplay.properties.get("fletxes_ubicacio", String.class, null));
+            cartell.properties.set("fletxes_num", clipboardMapDisplay.properties.get("fletxes_num", Integer.class, null));
+            cartell.properties.set("fletxes_orientacio", clipboardMapDisplay.properties.get("fletxes_orientacio", String.class, null));
+            cartell.properties.set("tipus", clipboardMapDisplay.properties.get("tipus", String.class, null));
+            cartell.properties.set("color", clipboardMapDisplay.properties.get("color", String.class, null));
+            for(int i = 1; i <= MAX_TEXT; i++){
+                cartell.properties.set("text_" + i, clipboardMapDisplay.properties.get("text_" + i, String.class, null));
+            }
+
+            // Reinicia
+            cartell.restartDisplay();
+
+            // Final
+            sender.sendMessage(ChatColor.AQUA + "-- ENGANXAR");
+            return true;
+        }
+
 
         //// ---- CONFIG -----
         // x command    : cartellcarretera , cc
@@ -841,6 +974,79 @@ public class TrensMinecat extends JavaPlugin {
             departureBoards.put(boardName, board);
         }
 
+        //// SPAWNERS
+
+        // Empty the spawnerData list
+        spawnerData.clear();
+
+        ConfigurationSection spawners = getConfig().getConfigurationSection("spawners");
+        if(spawners != null){
+            try {
+
+                /* TEST */ getLogger().log(Level.INFO, "[SD] ALL SPAWNERS: " + spawners.getKeys(false));
+
+                for(String spawnerId : Objects.requireNonNull(spawners).getKeys(false)){
+
+                    // actiu
+
+                    if(!spawners.getBoolean(spawnerId + ".actiu")) continue;
+
+                    // x , y , x
+                    int x, y, z;
+                    String bloc = Objects.requireNonNull(spawners.getString(spawnerId + ".bloc"));
+                    StringTokenizer lineTokenizer = new StringTokenizer(bloc, " ");
+                    x = Integer.parseInt(lineTokenizer.nextToken());
+                    y = Integer.parseInt(lineTokenizer.nextToken());
+                    z = Integer.parseInt(lineTokenizer.nextToken());
+
+                    // tipus
+
+                    String tipus = Objects.requireNonNull(spawners.getString(spawnerId + ".tipus"));
+
+                    // data
+
+                    java.util.Vector<String> dinici = new java.util.Vector<>();
+                    java.util.Vector<String> dfinal = new java.util.Vector<>();
+
+                    for(String pair : Objects.requireNonNull(spawners.getStringList(spawnerId + ".data"))){
+                        // Input format: MM1-DD1,MM2-DD2
+                        // Save as: dinici.add(MM1-DD1); dfinal.add(MM2-DD2);
+                        dinici.add(pair.split(",")[0]);
+                        dfinal.add(pair.split(",")[1]);
+                    }
+
+                    // inici / final
+
+                    String hinici = Objects.requireNonNull(spawners.getString(spawnerId + ".inici"));
+                    String hfinal = Objects.requireNonNull(spawners.getString(spawnerId + ".final"));
+
+                    // horari
+
+                    // Input format: hh-mm or hh-mm-ss
+                    // Save as: horari.add(*all*)
+                    java.util.Vector<String> horari = new java.util.Vector<>(Objects.requireNonNull(spawners.getStringList(spawnerId + ".horari")));
+
+                    spawnerData.add(new SpawnerData(spawnerId, x, y, z, tipus, dinici, dfinal, hinici, hfinal, horari));
+                }
+
+                for (SpawnerData spawner : spawnerData) {
+                    getLogger().log(Level.INFO, "[SD] SPAWNER:\n\n" + spawner.getFormattedData());
+                }
+            } catch (Exception e) {
+                getLogger().log(Level.WARNING, "Error inicialitzant SpawnerData.");
+                getLogger().log(Level.WARNING, e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            getLogger().log(Level.INFO, "No s'ha trobat cap spawner programat.");
+        }
+
+        trainWorldName = getConfig().getString("mon-trens");
+        trainSpawnDelay = getConfig().getInt("temps-espera-spawn");
+
+        //// fi SPAWNERS */
+
+
         secondsToDisplayOnBoard = getConfig().getInt("temps-minim-en-pantalla");
         trainDestroyDelay = getConfig().getInt("destruir-trens-en");
         dontDestroyTag = getConfig().getString("no-destrueixis");
@@ -850,6 +1056,37 @@ public class TrensMinecat extends JavaPlugin {
         Assets.loadAllAssets();
     }
 
+
+    public void automaticSpawner() {
+        // Check if any spawner has to spawn a train
+        for (SpawnerData spawner : spawnerData) {
+            if (spawner.isSpawning(LocalDateTime.now())) {
+                getLogger().log(Level.INFO, "[TS] Spawning train from " + spawner.getId());
+                try {
+                    spawnTrain(spawner.getX(), spawner.getY(), spawner.getZ());
+                    getLogger().log(Level.INFO, "[TS] Train " + spawner.getId() + " spawned at " + spawner.getX() + " " + spawner.getY() + " " + spawner.getZ());
+                } catch (Exception e) {
+                    getLogger().log(Level.WARNING, "[TS] Error spawning train from " + spawner.getId());
+                    getLogger().log(Level.WARNING, e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void spawnTrain(int x, int y, int z) {
+        // Set a Redstone Block on the coordinates
+        // 2 seconds later, remove the block
+
+        Location loc = new Location(Bukkit.getWorld(trainWorldName), x, y, z);
+
+        // Load the chunk where the spawner is
+        Objects.requireNonNull(Bukkit.getWorld(trainWorldName)).getChunkAt(loc);
+
+        loc.getBlock().setType(Material.REDSTONE_BLOCK);
+
+        Bukkit.getScheduler().runTaskLater(this, () -> loc.getBlock().setType(Material.AIR), 40L);
+    }
 
 
     static class RequestHandler implements HttpHandler {
