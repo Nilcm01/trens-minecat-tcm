@@ -371,7 +371,9 @@ public class CartellCarretera {
         private void renderGeneric() {
             // Fons
             getLayer(1).clear();
-            getLayer(1).fill(MapColorPalette.getColor(color_fons));
+            // getLayer(1).fill(MapColorPalette.getColor(color_fons));
+            // -> This fills with color beyond the size of the map
+            getLayer(1).fillRectangle(0, 0, blocksToPixels(ample), blocksToPixels(alt), MapColorPalette.getColor(color_fons));
 
             // Marc
             getLayer(2).clear();

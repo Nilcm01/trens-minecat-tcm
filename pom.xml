@@ -6,7 +6,7 @@
 
     <groupId>io.github.janvinas</groupId>
     <artifactId>trens-minecat</artifactId>
-    <version>1.5.11.10</version>
+    <version>1.5.11.11</version>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -49,6 +49,16 @@
             <artifactId>SignLink</artifactId>
             <version>1.17.1-v2-SNAPSHOT</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>spigot-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.bergerkiller.bukkit</groupId>
+                    <artifactId>BKCommonLib</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.intelie.omnicron</groupId>
