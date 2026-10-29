@@ -1,5 +1,7 @@
 package io.github.janvinas.trensminecat;
 
+import static org.bukkit.Bukkit.getLogger;
+
 import cloud.commandframework.types.tuples.Pair;
 import com.bergerkiller.bukkit.common.BlockLocation;
 import com.bergerkiller.bukkit.common.map.*;
@@ -53,7 +55,9 @@ import com.bergerkiller.bukkit.common.map.MapTexture;
 import com.bergerkiller.bukkit.sl.API.Variables;
 
 import java.awt.*;
+import java.awt.font.GlyphVector;
 import java.awt.image.BufferedImage;
+import java.awt.geom.Rectangle2D;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -70,9 +74,11 @@ public class CartellCarretera {
 
         static int MAX_TEXT = 10;
 
-        private static Font fontstd;
+        // Fonts
+        static Font FONT_OLD = new Font("Dialog", Font.PLAIN, 24);
+        // static Font FONT_HELVETICA = TrensMinecat.helveticaJavaFont.deriveFont(Font.PLAIN, 24);
 
-        private static int FONT_SIZE = 24;
+        Font fontstd = FONT_OLD;
 
         // Paràmetres: mida , color , fletxes , text
         float ample = 1;
@@ -195,7 +201,9 @@ public class CartellCarretera {
 
         @Override
         public void onAttached() {
-            fontstd = new Font("transport-heavy", Font.PLAIN, FONT_SIZE);
+            // fontstd = TrensMinecat.transportHeavyJavaFont;
+            // fontstd = new Font("transport-heavy", Font.PLAIN, FONT_SIZE);
+            // getLogger().info("CartellCarretera1: Font loaded: " + fontstd.getFontName() + ", size: " + fontstd.getSize());
 
             for (int i = 0; i < MAX_TEXT; i++) {
                 text.add(null);
@@ -389,6 +397,8 @@ public class CartellCarretera {
 
             // Text
             getLayer(3).clear();
+            getLayer(4).clear();
+            getLayer(5).clear();
             Graphics2D bi = bufferedImage.createGraphics();
             bi.setFont(fontstd);
             bi.setColor(color_text);
@@ -426,6 +436,8 @@ public class CartellCarretera {
 
             // Text
             getLayer(3).clear();
+            getLayer(4).clear();
+            getLayer(5).clear();
             Graphics2D bi = bufferedImage.createGraphics();
             bi.setFont(fontstd);
             bi.setColor(color_text);
@@ -473,6 +485,8 @@ public class CartellCarretera {
 
             // Text
             getLayer(3).clear();
+            getLayer(4).clear();
+            getLayer(5).clear();
             Graphics2D bi = bufferedImage.createGraphics();
             bi.setFont(fontstd);
             bi.setColor(color_text);
@@ -520,7 +534,9 @@ public class CartellCarretera {
                     new BufferedImage(blocksToPixels(ample), blocksToPixels(alt), BufferedImage.TYPE_INT_ARGB);
 
             Graphics2D bi = bufferedImage.createGraphics();
-            bi.setFont(fontstd);
+
+            Font bold = fontstd.deriveFont(Font.BOLD);
+            bi.setFont(bold);
 
             x -= 2;
 
@@ -528,27 +544,36 @@ public class CartellCarretera {
             for (String word : words) {
                 String type = getViaTypeFromLinia(word);
                 if (type != null) {
+                    bi.setFont(bold);
                     bi.setColor(getColorTextFromViaType(type));
 
                     String textToRender = word.replace("[", "").replace("]", "");
-                    int width = bi.getFontMetrics().stringWidth(textToRender);
-                    int height = bi.getFontMetrics().getHeight();
+                    FontMetrics metrics = bi.getFontMetrics();
+                    int width = metrics.stringWidth(textToRender);
+                    GlyphVector glyphs = fontstd.createGlyphVector(
+                            bi.getFontRenderContext(), textToRender);
+                    Rectangle2D textBounds = glyphs.getVisualBounds();
+                    int padding = 4;
+                    int boxTop = (int) Math.floor(y + textBounds.getY()) - padding;
+                    int boxBottom = (int) Math.ceil(
+                            y + textBounds.getY() + textBounds.getHeight()) + padding;
+                    int boxHeight = boxBottom - boxTop;
 
                     x = x + bi.getFontMetrics().stringWidth("[");
 
                     String id = word.split("\\[")[1].split("]")[0];
-                    int widthMarc = bi.getFontMetrics().stringWidth(id) + 8;
+                    int widthMarc = metrics.stringWidth(id) + 8;
                     getLayer(4).fillRectangle(
                             x - 4,
-                            y - height + 8 + 2,
+                            boxTop,
                             widthMarc,
-                            height - 4,
+                            boxHeight,
                             MapColorPalette.getColor(getColorFromViaType(type)));
                     getLayer(4).drawRectangle(
                             x - 4,
-                            y - height + 8 + 2,
+                            boxTop,
                             widthMarc,
-                            height - 4,
+                            boxHeight,
                             MapColorPalette.getColor(getColorTextFromViaType(type)));
 
                     bi.drawString(textToRender, x, y);
@@ -556,6 +581,7 @@ public class CartellCarretera {
                     x += width + bi.getFontMetrics().stringWidth(" "); // space between words
                 } else {
                     // If it's not a valid ID, draw the word directly
+                    bi.setFont(fontstd);
                     int width = bi.getFontMetrics().stringWidth(word);
                     bi.setColor(color_text);
                     bi.drawString(word, x, y);

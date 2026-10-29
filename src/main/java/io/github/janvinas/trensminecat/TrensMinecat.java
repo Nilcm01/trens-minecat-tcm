@@ -39,6 +39,7 @@ import picocli.CommandLine;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.time.LocalDateTime;
@@ -69,6 +70,8 @@ public class TrensMinecat extends JavaPlugin {
 
     public static Font minecraftiaJavaFont;
     public static Font helvetica46JavaFont;
+    public static Font helveticaJavaFont;
+    // public static Font transportHeavyJavaFont;
 
     public TrainTracker trainTracker = new TrainTracker();
 
@@ -126,8 +129,25 @@ public class TrensMinecat extends JavaPlugin {
 
 
 
-        minecraftiaJavaFont = new Font("minecraftia", Font.PLAIN, 8);
-        helvetica46JavaFont = new Font("helvetica", Font.PLAIN, 46);
+        // minecraftiaJavaFont = new Font("minecraftia", Font.PLAIN, 8);
+        // helvetica46JavaFont = new Font("helvetica", Font.PLAIN, 46);
+        int fontCheck = 0;
+
+        try (InputStream minecraftia = Objects.requireNonNull(getResource("fonts/Minecraftia-Regular.ttf"));
+             InputStream helvetica1 = Objects.requireNonNull(getResource("fonts/Helvetica.ttf"));
+             InputStream helvetica2 = Objects.requireNonNull(getResource("fonts/Helvetica.ttf"))) {
+            minecraftiaJavaFont = Font.createFont(Font.TRUETYPE_FONT, minecraftia)
+                .deriveFont(Font.PLAIN, 8);
+            fontCheck++;
+            helvetica46JavaFont = Font.createFont(Font.TRUETYPE_FONT, helvetica1)
+                .deriveFont(Font.PLAIN, 46);
+            fontCheck++;
+            helveticaJavaFont = Font.createFont(Font.TRUETYPE_FONT, helvetica2)
+                .deriveFont(Font.PLAIN, 24);
+            fontCheck++;
+        } catch (FontFormatException | IOException e) {
+            getLogger().log(Level.SEVERE, "Could not load bundled font " + fontCheck, e);
+        }
 
         trainTracker.loadTrains();
         getServer().getPluginManager().registerEvents(new EventListener(), this);
@@ -882,6 +902,19 @@ public class TrensMinecat extends JavaPlugin {
                     cartell.properties.set("text_" + args[2], text.toString());
 
                     break;
+
+                /* case "font":
+                    // 2 : nom font (old, helvetica)
+
+                    if (args.length < 3) return true;
+
+                    if (args[2].equalsIgnoreCase("old") || args[2].equalsIgnoreCase("helvetica")) {
+                        cartell.properties.set("font", args[2]);
+                    } else {
+                        sender.sendMessage(ChatColor.RED + "Font desconeguda. Les opcions són: old, helvetica");
+                        return true;
+                    } */
+
             }
 
             cartell.restartDisplay();
@@ -910,18 +943,19 @@ public class TrensMinecat extends JavaPlugin {
             sender.sendMessage(ChatColor.AQUA + "-- INFO");
 
             java.util.Vector<String> info = new java.util.Vector<String>();
-            info.add(ChatColor.YELLOW + "Ample: " + ChatColor.WHITE + cartell.properties.get("ample", Float.class, null) + " blocs");
-            info.add(ChatColor.YELLOW + "Alt: " + ChatColor.WHITE + cartell.properties.get("alt", Float.class, null) + " blocs");
-            info.add(ChatColor.YELLOW + "Color: " + ChatColor.WHITE + cartell.properties.get("color", String.class, null));
-            info.add(ChatColor.YELLOW + "Tipus: " + ChatColor.WHITE + cartell.properties.get("tipus", String.class, null));
+            info.add(ChatColor.YELLOW + "Ample: " + ChatColor.WHITE + cartell.properties.get("ample", Float.class, 1f) + " blocs");
+            info.add(ChatColor.YELLOW + "Alt: " + ChatColor.WHITE + cartell.properties.get("alt", Float.class, 1f) + " blocs");
+            info.add(ChatColor.YELLOW + "Color: " + ChatColor.WHITE + cartell.properties.get("color", String.class, "nacional"));
+            info.add(ChatColor.YELLOW + "Tipus: " + ChatColor.WHITE + cartell.properties.get("tipus", String.class, "buit"));
+            // info.add(ChatColor.YELLOW + "Font: " + ChatColor.WHITE + cartell.properties.get("font", String.class, "old"));
             info.add(ChatColor.YELLOW + "Text:\n");
             for (int i = 0; i < MAX_TEXT; i++) {
                 String l = cartell.properties.get("text_" + (i+1), String.class, null);
                 info.add(ChatColor.GREEN + "" + (i+1) + ": " + ChatColor.WHITE + l + "\n");
             }
             info.add(ChatColor.YELLOW + "Fletxes:");
-            info.add(ChatColor.GREEN + "Ubicació: " + ChatColor.WHITE + cartell.properties.get("fletxes_ubicacio", Integer.class, null));
-            info.add(ChatColor.GREEN + "Quantitat: " + ChatColor.WHITE + cartell.properties.get("fletxes_num", Integer.class, null));
+            info.add(ChatColor.GREEN + "Ubicació: " + ChatColor.WHITE + cartell.properties.get("fletxes_ubicacio", Integer.class, 0));
+            info.add(ChatColor.GREEN + "Quantitat: " + ChatColor.WHITE + cartell.properties.get("fletxes_num", Integer.class, 0));
             info.add(ChatColor.GREEN + "Orientació: " + ChatColor.WHITE + cartell.properties.get("fletxes_orientacio", String.class, null));
 
 
